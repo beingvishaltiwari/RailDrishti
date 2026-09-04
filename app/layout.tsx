@@ -8,19 +8,19 @@ import { BottomNav } from '@/components/layout/BottomNav';
 const inter = Inter({ subsets: ['latin'], display: 'swap' });
 
 export const metadata: Metadata = {
-  title: 'RailGaadi — Live Indian Train Tracker',
+  title: 'RailDrishti — Live Indian Train Tracker',
   description:
     'Experience train tracking redefined. Real-time Indian Railways tracking with interactive vector maps, delay analytics, weather intelligence, and terrain insights.',
-  keywords: ['train tracking', 'RailGaadi', 'live train status', 'Indian Railways', 'train map', 'IRCTC train'],
-  authors: [{ name: 'RailGaadi' }],
+  keywords: ['train tracking', 'RailDrishti', 'live train status', 'Indian Railways', 'train map', 'IRCTC train'],
+  authors: [{ name: 'RailDrishti' }],
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'RailGaadi',
+    title: 'RailDrishti',
   },
   openGraph: {
-    title: 'RailGaadi — Live Indian Train Tracker',
+    title: 'RailDrishti — Live Indian Train Tracker',
     description: 'Real-time train tracking with interactive maps and delay analytics.',
     type: 'website',
     locale: 'en_IN',
