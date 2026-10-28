@@ -1,0 +1,222 @@
+class SemanticNetwork:
+    def __init__(self):
+        # Store knowledge as subject-predicate-object triples
+        self.facts = []
+
+    def add_relation(self, subject, relation, obj):
+        """Add a relationship to the semantic network."""
+        fact = (subject, relation, obj)
+
+        if fact not in self.facts:
+            self.facts.append(fact)
+
+    def query(self, subject=None, relation=None, obj=None):
+        """Find relationships matching the given conditions."""
+        results = []
+
+        for s, r, o in self.facts:
+            if subject is not None and s != subject:
+                continue
+
+            if relation is not None and r != relation:
+                continue
+
+            if obj is not None and o != obj:
+                continue
+
+            results.append((s, r, o))
+
+        return results
+
+    def get_skills(self, student):
+        """Return all skills possessed by a student."""
+        return {
+            obj
+            for _, _, obj in self.query(
+                subject=student,
+                relation="HAS_SKILL"
+            )
+        }
+
+    def get_required_skills(self, role):
+        """Return the skills required for a job role."""
+        return {
+            obj
+            for _, _, obj in self.query(
+                subject=role,
+                relation="REQUIRES_SKILL"
+            )
+        }
+
+    def recommend_jobs(self, student):
+        """Recommend job roles based on matching skills."""
+        student_skills = self.get_skills(student)
+
+        if not student_skills:
+            return []
+
+        recommendations = []
+
+        # Find all available job roles
+        roles = {
+            subject
+            for subject, relation, _ in self.facts
+            if relation == "REQUIRES_SKILL"
+        }
+
+        for role in roles:
+            required_skills = self.get_required_skills(role)
+
+            if not required_skills:
+                continue
+
+            matched_skills = student_skills & required_skills
+
+            # Calculate percentage of required skills matched
+            score = (
+                len(matched_skills) / len(required_skills)
+            ) * 100
+
+            if score > 0:
+                # Find companies offering this role
+                companies = [
+                    obj
+                    for _, _, obj in self.query(
+                        subject=None,
+                        relation="OFFERS_ROLE",
+                        obj=role
+                    )
+                ]
+
+                recommendations.append({
+                    "role": role,
+                    "companies": companies,
+                    "score": round(score, 2),
+                    "matched_skills": sorted(matched_skills),
+                    "missing_skills": sorted(
+                        required_skills - student_skills
+                    )
+                })
+
+        # Rank recommendations from highest to lowest score
+        recommendations.sort(
+            key=lambda item: item["score"],
+            reverse=True
+        )
+
+        return recommendations
+
+    def display_network(self):
+        """Display all semantic network relationships."""
+        print("\n========== SEMANTIC NETWORK ==========")
+
+        for subject, relation, obj in self.facts:
+            print(f"{subject} --[{relation}]--> {obj}")
+
+
+# --------------------------------------------------
+# CREATE THE PLACEMENT OPPORTUNITY KNOWLEDGE BASE
+# --------------------------------------------------
+
+network = SemanticNetwork()
+
+# Student information
+network.add_relation("Vishal", "IS_A", "Student")
+network.add_relation("Vishal", "HAS_SKILL", "Python")
+network.add_relation("Vishal", "HAS_SKILL", "SQL")
+network.add_relation("Vishal", "HAS_SKILL", "Machine Learning")
+network.add_relation("Vishal", "HAS_SKILL", "Data Structures")
+
+# Job roles and their required skills
+network.add_relation(
+    "Data Scientist", "REQUIRES_SKILL", "Python"
+)
+network.add_relation(
+    "Data Scientist", "REQUIRES_SKILL", "SQL"
+)
+network.add_relation(
+    "Data Scientist", "REQUIRES_SKILL", "Machine Learning"
+)
+
+network.add_relation(
+    "Software Developer", "REQUIRES_SKILL", "Java"
+)
+network.add_relation(
+    "Software Developer", "REQUIRES_SKILL", "Data Structures"
+)
+network.add_relation(
+    "Software Developer", "REQUIRES_SKILL", "OOP"
+)
+
+network.add_relation(
+    "Data Analyst", "REQUIRES_SKILL", "Python"
+)
+network.add_relation(
+    "Data Analyst", "REQUIRES_SKILL", "SQL"
+)
+network.add_relation(
+    "Data Analyst", "REQUIRES_SKILL", "Excel"
+)
+
+# Companies offering job roles
+network.add_relation(
+    "ABC Technologies", "OFFERS_ROLE", "Data Scientist"
+)
+network.add_relation(
+    "XYZ Solutions", "OFFERS_ROLE", "Software Developer"
+)
+network.add_relation(
+    "Global Analytics", "OFFERS_ROLE", "Data Analyst"
+)
+
+# Placement opportunity information
+network.add_relation(
+    "Data Scientist", "HAS_OPPORTUNITY", "DS_Internship"
+)
+network.add_relation(
+    "Software Developer", "HAS_OPPORTUNITY", "SDE_Internship"
+)
+network.add_relation(
+    "Data Analyst", "HAS_OPPORTUNITY", "Analyst_Internship"
+)
+
+
+# --------------------------------------------------
+# RUN THE RECOMMENDATION SYSTEM
+# --------------------------------------------------
+
+if __name__ == "__main__":
+
+    print("PLACEMENT OPPORTUNITY RECOMMENDATION SYSTEM")
+    print("Using Semantic Network")
+
+    # Display all stored relationships
+    network.display_network()
+
+    # Generate recommendations
+    student = "Vishal"
+    recommendations = network.recommend_jobs(student)
+
+    print(f"\n\nRecommendations for {student}")
+    print("=" * 45)
+
+    if not recommendations:
+        print("No matching opportunities found.")
+
+    else:
+        for index, job in enumerate(recommendations, start=1):
+
+            print(f"\n{index}. Job Role: {job['role']}")
+            print(f"   Companies: {', '.join(job['companies'])}")
+            print(f"   Matching Score: {job['score']}%")
+
+            print(
+                "   Matched Skills: "
+                + ", ".join(job["matched_skills"])
+            )
+
+            if job["missing_skills"]:
+                print(
+                    "   Skills to Learn: "
+                    + ", ".join(job["missing_skills"])
+                )
